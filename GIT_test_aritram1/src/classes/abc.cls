@@ -1,5 +1,5 @@
 public class abc
 {
      integer a; 
-     integer b, c;  
+     integer b, c,d;  
 }
