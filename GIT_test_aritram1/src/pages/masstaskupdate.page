@@ -1,0 +1,24 @@
+<apex:page controller="MassTaskController" >
+ <apex:form id="form_1">
+  <apex:pageBlock >
+   <apex:pageblocksection title="This is the table !!">
+    <apex:pageblocksectionItem >
+     <apex:pageblocktable value="{!listOfTaskStub}" var="v">
+      
+      <apex:column > <apex:inputCheckbox value="{!v.bselected}" onclick="{!toggleAll}"/> </apex:column>
+      <apex:column headerValue="Id" value="{!v.id}"/>
+      <apex:column headerValue="Subject" value="{!v.subject}"/>
+      <apex:column headerValue="status" value="{!v.status}"/>
+     
+     </apex:pageblocktable>
+    </apex:pageblocksectionItem>
+    </apex:pageblocksection>  
+    
+     <apex:pageblockbuttons >
+        <apex:commandButton action="{!createStubList}" value="Find Tasks"/>
+    </apex:pageblockbuttons>
+    </apex:pageBlock> 
+  
+    </apex:form>
+ 
+</apex:page>

@@ -1,0 +1,26 @@
+<apex:page StandardController="Account" extensions="POC_CLASS">
+ <apex:pageblock >
+  <apex:form >
+   <apex:pageblocksection >
+   <apex:outputlabel > Enter the Account Name </apex:outputlabel>
+    <apex:pageblocksectionitem >
+     <apex:inputText value="{!accountName}"/>
+     </apex:pageblocksectionitem>
+    <apex:pageblocksectionitem >
+     <apex:commandbutton value="Search Account" action="{!method_withSharing_SearchAccounts}" />
+    </apex:pageblocksectionitem>
+  </apex:pageblocksection>
+  </apex:form>
+ </apex:pageblock> 
+ 
+ <apex:pageblock rendered="{!SearchedResult.size > 0}">
+ 
+ <apex:pageblocktable value="{!SearchedResult}" var="v">
+  <apex:column headerValue="Account Name" value="{!v.id}"/>
+  <apex:column headerValue="Account Phone" value="{!v.phone}"/>
+  <apex:column headerValue="Account Type" value="{!v.Type}"/>
+ </apex:pageblocktable>
+ </apex:pageblock>
+
+ 
+</apex:page>

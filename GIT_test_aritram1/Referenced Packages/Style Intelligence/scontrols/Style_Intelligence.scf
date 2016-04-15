@@ -1,0 +1,25 @@
+<html>
+  <head>
+    <title>Style Intelligence for Salesforce</title>
+    <script type="text/javascript">
+      function layoutPage() {
+         parent.document.getElementById("bodyTable").style.padding = "0px";
+      }
+
+      function submitRedirect() {
+         layoutPage();
+
+         var tzoffset = (-1 *(new Date()).getTimezoneOffset());
+         var sessionid = "{!API.Session_ID}";
+         var serverurl = "{!API.Partner_Server_URL_120}";
+       
+         var url = "https://www.salesforcereporting.com/app/login?session_id=" +
+            sessionid + "&tz_offset=" + tzoffset + "&server_url=" + serverurl;
+
+         parent.document.getElementById("itarget").src = url;
+      }
+    </script>
+  </head>
+  <body onload="submitRedirect()" style="margin: 0px; padding: 0px;">
+  </body>
+</html>

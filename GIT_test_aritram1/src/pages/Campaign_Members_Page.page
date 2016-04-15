@@ -1,0 +1,17 @@
+<apex:page controller="testController">
+    <apex:pageBlock title="Select Contacts to Send Email For {!Campaign.Name}" mode="detail">
+     
+        <apex:datatable cellpadding="5" var="leadContact" value="{!Search}">
+            
+            <apex:column value="{!leadContact.HasOptedOutOfEmail}" headerValue=""/>
+            <apex:column value="{!leadContact.id}" headerValue="Id"/>
+            <apex:column value="{!leadContact.Name}" headerValue="Name"/>
+            <apex:column value="{!leadContact.email}" headerValue="Contact Email" />
+            <apex:column value="{!leadContact.ownerId}" headerValue="Contact Owner" />
+
+        </apex:datatable> 
+        <apex:form >
+            <apex:commandButton value="Next" action="{!Something}"></apex:commandButton>       
+        </apex:form>
+    </apex:pageBlock>
+</apex:page>

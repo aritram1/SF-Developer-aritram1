@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObject xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fields>
+        <fullName>skype_name__c</fullName>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <label>Skype name</label>
+        <length>128</length>
+        <required>false</required>
+        <trackFeedHistory>false</trackFeedHistory>
+        <type>Text</type>
+        <unique>false</unique>
+    </fields>
+    <webLinks>
+        <fullName>InviteUserToSkype</fullName>
+        <availability>online</availability>
+        <displayType>link</displayType>
+        <linkType>javascript</linkType>
+        <masterLabel>Invite user to Skype</masterLabel>
+        <openType>onClickJavaScript</openType>
+        <protected>false</protected>
+        <url>SkypeNick = &apos;{!Contact.skype_name__c}&apos;;
+FullName = &apos;{!Contact.FirstName}&apos; + &apos; &apos; + &apos;{!Contact.LastName}&apos;;
+
+if(SkypeNick==&apos;&apos;) {
+  window.location.replace(&quot;mai&quot; + &quot;lto:{!Contact.Email}?subject=&quot; + escape(&quot;You&apos;re on Skype?&quot;) + &quot;&amp;body=&quot; + escape(&quot;Hey {!Contact.FirstName},\r\nI&apos;m using Skype to make phone calls over my PC. The service is really inexpensive and includes free video calls. The quality is great. Give it a try http://www.skype.com/go/getskype-salesforce.\r\n\r\nSorry for the generic email...  it&apos;s worth the download.\r\n\r\nregards\r\n{!$User.FirstName} {!$User.LastName}&quot;)); 
+}
+else
+{
+  alert(&quot;This user already has a Skype name&quot;);
+}</url>
+    </webLinks>
+</CustomObject>

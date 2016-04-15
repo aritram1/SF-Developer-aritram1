@@ -1,0 +1,27 @@
+<apex:page standardController="Account" extensions="class_Explain_ApexMessage">
+ <apex:form >
+  <apex:pageBlock id="id_pageBlock">
+  
+   <apex:Messages />
+  
+
+   <apex:pageblocksection >
+    <apex:pageblockSection >
+     <apex:pageblockSectionItem >
+       <apex:outputLabel value="Account.site"/>
+     </apex:pageblockSectionItem>
+     <apex:pageblockSectionItem >
+      <apex:inputField value="{!a.site}"/>
+     </apex:pageblockSectionItem>
+    </apex:pageblockSection>
+   </apex:pageblocksection>
+ 
+ <apex:pageblockButtons >
+  <apex:commandButton value="Save" action="{!methodApexMessage}" rerender="id_pageBlock"/>
+ </apex:pageblockButtons>
+ 
+  </apex:pageBlock>
+
+  
+ </apex:form>
+</apex:page>

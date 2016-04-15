@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ApexPage xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>15.0</apiVersion>
+    <availableInTouch>false</availableInTouch>
+    <confirmationTokenRequired>false</confirmationTokenRequired>
+    <description>This lists down all the contacts and leads related to this particular Campaign.</description>
+    <label>Campaign Members Page</label>
+    <packageVersions>
+        <majorNumber>1</majorNumber>
+        <minorNumber>2</minorNumber>
+        <namespace>Skype4SF</namespace>
+    </packageVersions>
+    <packageVersions>
+        <majorNumber>1</majorNumber>
+        <minorNumber>7</minorNumber>
+        <namespace>ajax</namespace>
+    </packageVersions>
+    <packageVersions>
+        <majorNumber>1</majorNumber>
+        <minorNumber>12</minorNumber>
+        <namespace>inetsoft</namespace>
+    </packageVersions>
+</ApexPage>

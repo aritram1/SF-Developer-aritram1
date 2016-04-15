@@ -1,0 +1,678 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html> 
+<head>
+<title></title>
+<!--- (c) PamConsult GmbH, 2007, All rights reserved -->
+<link  href="/dCSS/Theme2/default/common.css" type="text/css" rel="stylesheet" media="handheld,print,projection,screen,tty,tv" >
+<link  href="/dCSS/Theme2/default/custom.css" type="text/css" rel="stylesheet" media="handheld,print,projection,screen,tty,tv" >
+<OBJECT id=SkypeForceTools classid="CLSID:A0022DE4-AAEA-420d-8BB4-B6E2C6D9EB10"></OBJECT>
+<style type="text/css"rel="stylesheet" >
+.skypebtn {
+	height: 60px;
+	width: 150px;
+	cursor: pointer;
+}
+.handy { cursor: pointer; }
+</style>
+<script type="text/javascript" src="/js/functions.js"></script>
+<script src="/soap/ajax/9.0/connection.js" type="text/javascript"></script>
+<script language="javascript"> 
+<!--
+var max_opps_to_show = 40; // number of opps to show , skip the rest
+var imgsrc2 = "/servlet/servlet.FileDownload?file=";
+//var buttonimage2 = "/servlet/servlet.FileDownload?file="; // the button image
+
+var cfields = ['Id','FirstName','LastName','Phone','Title','MailingCountry'];
+var ufields = ['id','firstname','lastname','phone','title','Country','CompanyName'];
+var both ; // both the contacts and users in one list
+var retUrl = "/006/o";  // until we have one, return to opp home 
+var pb; // global page block element
+var ta; // main table to add contacts to
+var MaxConfCallParticipants;
+
+function refresh() 
+{ 
+	window.parent.parent.location.href = window.parent.parent.location.href;
+}
+
+function jumpback() 
+{ 
+	window.parent.parent.location.href = retUrl; 
+} 
+
+function pageInit() 
+{  
+	pb = document.getElementById("mainpageblock");	
+	check_for_fields(); 
+	imgsrc2 += fetch_imgids('landline.gif');
+	//buttonimage2 += fetch_imgids('baloon_white_callme.png');
+	sforce.connection.client = "Skype/";
+	MaxConfCallParticipants = getMaxConfCallParticipants();
+	if(UrlGetParameter("opportunityid") == "")
+	{
+		document.all.desc.innerHTML = "Select an Opportunity";
+		document.all.StatusMessage.innerHTML = "Click on an Opportunity from the list (open Opportunties owned by {!User.Name}).";
+		draw_opps();
+	}
+	else
+	{
+		// called from opp details
+		var qr = sforce.connection.query( "Select Amount, Id, Name, AccountId, CloseDate, StageName, Type From Opportunity where Id = '" + UrlGetParameter("opportunityid") + "'");
+		var records = qr.getArray("records");
+		if(records.length < 1) 
+		{
+			alert("Opportunity '" + UrlGetParameter("opportunityid") + "' not found");
+			jumpback(); return;
+		} 				
+		var op = records[0];
+		var elem = new Object();
+		elem.opp = op;
+		clickOppConCall(elem);
+	}
+}
+
+function fetch_imgids(na) 
+{ 
+	var where = " name = '"+na+"' ";
+	var imgs = sforce.connection.query("select id from Document where " +where);
+	var records = imgs.getArray("records");
+	if (records.length < 1) return null;
+	return records[0].get("Id");
+	
+}
+
+var contact_has_skypename;
+var user_has_skypename;
+function check_for_fields() 
+{ 
+	cfields.push("Skype4SF__skype_name__c");
+	ufields.push("Skype4SF__skype_name__c");
+	contact_has_skypename = true;
+	user_has_skypename = true;
+
+	/*
+	// see if the skypename field is enabled in this org
+	// on contact and user, keep a var to check later when drawing the page
+	var desc = new sforce.SObject("Contact");
+	var fields = desc.getFields();	
+	contact_has_skypename = fields["Skype4SF__skype_name__c"] != null;
+	if(contact_has_skypename) 
+		cfields.push("Skype4SF__skype_name__c");
+	desc = new sforce.SObject("User");
+	user_has_skypename = desc.definition.fieldMap.containsItem("Skype4SF__skype_name__c");
+	if(user_has_skypename)
+		ufields.push("Skype4SF__skype_name__c");
+	*/
+}
+
+function draw_opps() 
+{ 
+	// list of recent modified opps to offer for a conn call
+	var qr = sforce.connection.query( "Select Amount, Id, Name, AccountId, CloseDate, StageName, Type From Opportunity where OwnerId = '" +  "{!User.Id}" + "' and IsClosed = false" );
+	var records = qr.getArray("records");
+	if(records.length < 1) 
+	{
+		alert("No Open Opportunities found for user\nUser Name :  {!User.Name}\n" + " To run this control you must be the owner \nof one or more open opportunities\nPlease see datasheet in the Skype Document folder for more details");
+		jumpback(); return;
+	} 
+	//records.sort(sortDate)
+	var ta = MakeTable() 
+	var th = makeRow([]); 
+	th.active == false;
+	ta.tbody.appendChild(th);
+		
+	createTag(th,"th").innerHTML = "Opport. Name";
+	createTag(th,"th").innerHTML = "Stage";
+	createTag(th,"th").innerHTML = "Close Date";
+	createTag(th,"th").innerHTML = "Amount";
+	
+	for(var i=0;i<records.length;i++) 
+	{ 
+		var op = records[i]
+		if (i >= max_opps_to_show) {break;} // max number to show, so we don't have to page
+		
+		var atts = new Object();
+		if (i==0)  // skin stuff
+			atts["class"] = "even first";
+		else if (ta.even == true)
+			atts["class"] = "even";
+		else
+			atts["class"] = "odd";
+		ta.even = !ta.even;	
+		atts["onmouseout"] = "if (typeof(hiOff) != 'undefined' && this.active == false){hiOff(this);}";
+		atts["onmouseover"] = "if (typeof(hiOn) != 'undefined'){hiOn(this);}";
+		atts["onclick"] = "clickOppConCall(this);"; // search
+		atts["class"] = "handy";
+		var tr = makeRow(atts);
+		tr.active == true;
+		
+		tr.opp = op;
+		ta.tbody.appendChild(tr);
+	
+		createTag(tr,"td",[]).innerHTML = "<img class=\"handy\" src=\"/img/icon/opportunities16.gif\" ALIGN=\"middle\" >&nbsp;&nbsp;&nbsp;" + op.get("Name");
+		createTag(tr,"td",[]).innerHTML = op.get("StageName")
+		createTag(tr,"td",[]).innerHTML = op.get("CloseDate"); //Sforce.Util.FormatDate(op.get("CloseDate"), "M/d/yyyy");
+		createTag(tr,"td",[]).innerHTML = op.get("Amount")			
+	}
+	document.getElementById("maintable").appendChild(ta);	
+}
+
+var opp;
+function clickOppConCall(elem) 
+{  
+	// clear the table
+	document.getElementById("maintable").innerHTML = "";	
+
+	document.getElementById("instructions").innerHTML = "<b>Generating a list of Contacts and Sales Team Members, Please wait ... </b>";
+	/* for a normal button add this back in
+	document.getElementById("buttons").innerHTML = "<td class=\"pbButton\">" +
+	 "<input name=\"save\" value=\" Begin Conference Call \" class=\"button\" type=\"button\"  onclick=\"javascript: beginCall(document.forms['editPage'],'ids');\" ></td>";
+	*/ 
+	opp = elem.opp;
+	document.getElementById("desc").innerHTML = elem.opp.get("Name");
+	setTimeout("list_partners();", 1); // list the contacts and users here
+}
+
+function list_partners() 
+{ 
+	document.getElementById("instructions").innerHTML = "<b>Select up to " + MaxConfCallParticipants + " contacts or users to join in the call</b>";
+	// get contact roles and sales teams from this opp
+	retUrl = "/"+opp.get("Id");
+	var ocr = sforce.connection.query("select ContactId, Role from OpportunityContactRole where OpportunityId = '" + opp.get("Id") + "'");
+	var records = ocr.getArray("records");
+	// it's ok if there were none
+	var account_name = get_acc_name(opp.get("AccountId"));
+	var ocrids = new Array(); 
+	if(records.length > 0) 
+	{ 
+		for(var i in records) 
+			ocrids.push(records[i].get("ContactId") );
+		var contacts_ = sforce.connection.retrieve(cfields.join(),"Contact",ocrids);
+		if(contacts_.className == "Fault") 
+		{
+			alert("could not get contacts "+contacts_.toString());
+			return;
+		}
+		for(var i in contacts_) {  // fill in a name for the account
+			contacts_[i].AccountName = account_name;
+		}	
+	}
+	var users_ = null;
+	/*
+	// now pull the sales team
+	var otm = sforce.connection.query( "select UserId from OpportunityTeamMember where opportunityid = '" + opp.get("Id")+ "'")
+	var stids = new Array(); 
+	records = otm.getArray("records");
+	if(records.length > 0) 
+	{ 
+		for(var i in records) { 
+			stids.push(records[i].get("UserId") );
+		}
+		var users_ = sforce.connection.retrieve(ufields.join(), "User", stids);
+		if(users_.className == "Fault") {
+			alert("could not get user info "+users_.toString());
+			return;
+		}		
+		for(var i in users_) {  // fill in a name for the user's org
+			users_[i].AccountName = users_[i].get("CompanyName");
+		}
+	} 
+	
+	// join into one list and draw, we should have atleast one
+	both = contacts_
+	if(!both) both = users_;
+	if(contacts_ && users_ ) { both = contacts_.concat(users_) }
+	
+	if(! both || both.length < 1) { 
+		alert("Unable to proceed !\nno customer contact roles or sales team members found at this opportunity\n"+
+		"Please update the Opportunity with Contact Roles and Sales Team members\nthen re-run this control"); 
+		jumpback(); return; 
+	}
+	both.sort(sortLast);
+	if(users_) { users_.sort(sortLast);}
+	*/
+	if(contacts_) { contacts_.sort(sortLast);}
+	
+	ta = MakeTable()
+	var th = makeRow(  );
+	th.active == false;
+	ta.tbody.appendChild(th);
+	var h = ['Contacts','Name','Company','Title','Phone'];
+	for(var i in h) { createTag(th,"th").innerHTML = h[i]; }
+	if(contact_has_skypename || user_has_skypename) { 
+		createTag(th,"th").innerHTML = "Skype Name"; 
+	}
+	
+	if(contacts_) {
+		for (var i=0;i<contacts_.length;i++) { callee(contacts_[i],i) } 
+	}
+
+	if (users_) { 
+		th = makeRow(  ); 
+		th.active == false;
+		ta.tbody.appendChild(th);
+		var h = ['Sales Team','Name','Company','Ttile','Phone'];
+		for (var i in h) { createTag(th, "th").innerHTML = h[i]; }
+		if (contact_has_skypename || user_has_skypename) { 
+			createTag(th,"th").innerHTML = "Skype Name"; 
+		}
+
+		for (var i=0;i<users_.length;i++) { callee(users_[i], i) } 
+	}
+	
+	document.getElementById("maintable").appendChild(ta); 
+
+	// throw up a bigger skype button 
+	//document.getElementById("skypebutton").innerHTML = "<A href=\"#\" class=\"skypebtn\" onclick=\"javascript: beginCall(document.forms['editPage'],'ids');\" alt==\" Begin Conference Call \" >" +
+	//	"<img src=\"" + buttonimage2 + "\" ></a>";
+		
+	document.getElementById("sendfilebutton").innerHTML = "<input name=\"save\" value=\" Send File \" class=\"button\" type=\"button\"  onclick=\"javascript: beginFileTransfer(document.forms['editPage'],'ids');\" >";
+	document.getElementById("chatbutton").innerHTML = "<input name=\"save\" value=\" Begin Chat \" class=\"button\" type=\"button\"  onclick=\"javascript: beginChat(document.forms['editPage'],'ids');\" >";
+	document.getElementById("skypebutton").innerHTML = "<input name=\"save\" value=\" Begin Conference Call \" class=\"button\" type=\"button\"  onclick=\"javascript: beginCall(document.forms['editPage'],'ids');\" >";
+}
+
+function callee(who, i) 
+{ 
+	// draw one row of a callee
+	var atts = new Object();
+	var id = who.get("Id");
+	var even = ((i % 2) == 0);
+	if (i==0) {
+		atts["class"] = "even first";
+	} else if (even == true) {
+		atts["class"] = "even";
+	} else {
+		atts["class"] = "odd";
+	}
+	
+	atts["onmouseout"] = "if (typeof(hiOff) != 'undefined' && this.active == false){hiOff(this);}";
+	atts["onmouseover"] = "if (typeof(hiOn) != 'undefined'){hiOn(this);}";
+	atts["onclick"] = "checkboxclick(this);";
+	atts["class"] = "handy";
+	var tr = makeRow(atts);
+	tr.active == false;
+	
+	ta.tbody.appendChild(tr);
+	var td = document.createElement("td");
+	//td.setAttribute("width","150px");
+	tr.appendChild(td);
+	td.callee = who // keep a pointer to the entire contact bean in the DOM
+	td.innerHTML = "<input onclick=\"checkboxclick(this);\" type=\"checkbox\" name=\"ids\" value=\"" + 
+		id + "\" id=\"ids\" >";  // store the id in the html form element for later
+	
+	var skicon = "";
+	//if ( who.definition.fieldMap.containsItem("Skype4SF__skype_name__c") ) 
+	{ 
+		if ( who.get("Skype4SF__skype_name__c") ) { // replace the default with a valid status gif from skype
+			skicon = "&nbsp;&nbsp;<img align=absmiddle src=\"https://www.scendix.biz/skypestatus.php?user=" + who.get("Skype4SF__skype_name__c");
+		//	"/smallclassic"; 
+		//	"/smallicon" 
+		//	"/mediumicon" 
+			/*Balloon Style
+			 http://mystatus.skype.com/skypename/balloon
+			Big Classic Style
+			 http://mystatus.skype.com/skypename/bigclassic
+			Small Classic Style (transparent background)
+			 http://mystatus.skype.com/skypename/smallclassic
+			Small Icon (transparent background)
+			 http://mystatus.skype.com/skypename/smallicon
+			Medium Icon 
+			 http://mystatus.skype.com/skypename/mediumicon
+			Dropdown White Background http://mystatus.skype.com/skypename/dropdown-white
+			Dropdown Transparent Background http://mystatus.skype.com/skypename/dropdown-trans
+			*/
+			skicon += "\">";
+		}	
+	} 
+	
+	td = document.createElement("td");
+	tr.appendChild(td);
+	td.innerHTML = 
+		//"<img src=\"/img/icon/contacts16.png\" alt=\"Contact\" ALIGN=\"middle\" >&nbsp;&nbsp;&nbsp;" + 
+		who.get("FirstName") + " " + who.get("LastName") + skicon;
+		//"<a href=\"/" + who.get("Id") + "\" target=_top>" + who.get("LastName") + ", " + who.get("FirstName") + "</a>";
+	
+	td = document.createElement("td");
+	tr.appendChild(td);
+	td.innerHTML = myget( who.AccountName );
+	
+	td = document.createElement("td");
+	tr.appendChild(td);
+	td.innerHTML = myget(who.get("Title") )
+	
+	td = document.createElement("td");
+	tr.appendChild(td);
+	td.innerHTML = myget(who.get("Phone") )
+	
+	//if ( who.definition.fieldMap.containsItem("Skype4SF__skype_name__c") ) 
+	{ 
+		//alert('name is '+who.get("Skype4SF__skype_name__c"))
+		td = document.createElement("td");
+		tr.appendChild(td);
+		td.innerHTML = myget(who.get("Skype4SF__skype_name__c"))
+		tr.appendChild(td);	
+	}
+}
+
+function myget(name) 
+{
+  if(name == null) 
+  	return "&nbsp;"; 
+  return name; 
+}
+
+function checkboxclick(id) 
+{  
+	try { 
+		var checked = id.cells[0].firstChild.checked; 
+		id.cells[0].firstChild.checked  = !checked;
+	} catch (e) { 
+		var checked = id.checked; 
+		id.checked  = !checked;
+	}
+}
+
+function getTargetUsers(form, element_name)
+{
+	var targetUsers = new Array();
+	for (i = 0; i < form.elements.length; i++) { 
+		if ((form.elements[i].name == element_name) && (form.elements[i].checked)) { 
+			// push the contact or user bean that we stored on the TD element
+			if ( form.elements[i].parentNode.callee ) { 
+				targetUsers.push(form.elements[i].parentNode.callee); 
+			}
+		} 
+	} 
+	return targetUsers;
+}
+
+function beginCall(form,element_name) 
+{ 
+	var callList = getTargetUsers(form, element_name);
+	if ( callList.length > MaxConfCallParticipants ) { 
+		alert("Sorry, you may only join " + (MaxConfCallParticipants + 1) + " total callers to a conference.\n" +
+			"Yourself and " + MaxConfCallParticipants + " others, please un-select some contacts");
+		return;
+	} 
+	if (callList.length > 0) { 
+		conCall(callList); // list of beans
+	} else { 
+	 	alert("No Contacts selected to call\nPlease select one or more from the contact list"); 
+	} 
+} 
+
+function conCall(list) 
+{ 
+	// list of contact or user beans
+	var phone = ''; 
+	for (var i in list) { 
+		var who = list[i];
+		if (!who) { next; } // if null for some reason
+		if ( who.get("Skype4SF__skype_name__c") ) { 
+			phone += who.get("Skype4SF__skype_name__c");   
+		} else 
+		if ( who.get("Phone") ) { 
+			phone += formatPhoneNumber(who);
+		}
+		if (i <= list.length) phone += ';'
+	} 
+	if (!phone) { alert( "no phone number found"); jumpback();}
+	// alert("phone is >"+phone+"<") // debug
+	
+	// do this in an i frame so don't lose context in this thread
+	var win = document.getElementById("callFrame") 
+	if(!win) alert('could not get contentBody') 
+	else win.src =  "skype:" + phone + "?call";
+	//setTimeout("jumpback();",3000); // go to our opp
+	return;
+}
+
+function beginChat(form, element_name) 
+{ 
+	var callList = getTargetUsers(form, element_name);
+	if (callList.length > 0) { 
+		startChat(callList); // list of beans
+	} else { 
+	 	alert("No Contacts selected to chat\nPlease select one or more from the contact list"); 
+	} 
+} 
+
+function startChat(list) 
+{ 
+	// list of contact or user beans
+	var phone = ''; 
+	for (var i in list) { 
+		var who = list[i];
+		if (!who) { next; } // if null for some reason
+		if ( who.get("Skype4SF__skype_name__c") ) { 
+			phone += who.get("Skype4SF__skype_name__c");   
+		} 
+		if (i <= list.length) phone += ';'
+	} 
+	if (!phone) { alert( "No user has a Skype Name"); 
+		jumpback();}
+	
+	// do this in an i frame so don't lose context in this thread
+	var win = document.getElementById("callFrame") 
+	if(!win) alert('could not get contentBody') 
+	else win.src =  "skype:" + phone + "?chat";
+	//setTimeout("jumpback();",3000); // go to our opp
+	return;
+}
+
+function beginFileTransfer(form, element_name) 
+{ 
+	var callList = getTargetUsers(form, element_name);
+	if (callList.length > 0) { 
+		startFileTransfer(callList); // list of beans
+	} else { 
+	 	alert("No Contacts selected to chat\nPlease select one or more from the contact list"); 
+	} 
+} 
+
+function startFileTransfer(list) 
+{ 
+	// list of contact or user beans
+	var phone = ''; 
+	for (var i in list) { 
+		var who = list[i];
+		if (!who) { next; } // if null for some reason
+		if ( who.get("Skype4SF__skype_name__c") ) { 
+			phone += who.get("Skype4SF__skype_name__c");   
+		} 
+		if (i <= list.length) phone += ';'
+	} 
+	if (!phone) { alert( "No user has a Skype Name"); 
+		jumpback();}
+	
+	// do this in an i frame so don't lose context in this thread
+	var win = document.getElementById("callFrame") 
+	if(!win) alert('could not get contentBody') 
+	else win.src =  "skype:" + phone + "?sendfile";
+	return;
+}
+
+function formatPhoneNumber(record) 
+{ 
+	// format and return an international dialing number
+	var phone = record.get("Phone");
+	try
+	{
+		var oParser = new ActiveXObject("SPhoneParser.PhoneNumberRecognizer");
+		var ret = oParser.Parse(phone, "", "", "", false, false);
+		if(ret.Count > 0)
+			return ret(1).NumberToCall;
+	}
+	catch(e)
+	{
+	}
+	
+	phone = phone.replace(/\D/g,''); // remove all non alpha chars
+
+	var country; 
+	try {  // contact record
+		country = record.get("MailingCountry"); } 
+	catch (e) { // user record
+		country = record.get("Country");
+	}
+	
+	var countrycode = "1" ; // default to us country code
+	// set other country codes here, TODO 
+	
+	// end set other country codes
+	
+	if (phone.length == 10) { // almost, but missing the country code
+		phone = countrycode+phone;
+	}
+	return "+" + phone;	
+}
+
+function sortLast(a, b) 
+{
+	if (a.get("LastName") < b.get("LastName") ) return -1
+	return 1;
+}
+
+function sortDate(a, b) 
+{
+	return a.get("CloseDate") - b.get("CloseDate");
+}
+
+function makeRow(atts) 
+{
+	var trTag = "<TR ";
+	for (key in atts) {
+		trTag += key + "=\"" + atts[key] + "\"";
+	}
+	trTag += ">";
+	var ret = document.createElement(trTag);
+	ret.active = false;
+	return ret;
+}
+
+function MakeTable() 
+{
+	var table = document.createElement("table");
+	table.className = "list";
+	table.width = "95%";
+	table.border = "0";
+	table.cellspacing = "0";
+	table.cellpadding = "0";
+	var tbody = document.createElement("tbody");
+	table.appendChild(tbody);
+	table.even = true;
+	table.tbody =tbody;
+	return table
+}
+
+function createTag(parent, name, keyvalPairs) 
+{
+	var el = document.createElement(name);
+	for (key in keyvalPairs)
+		el.setAttribute(key, keyvalPairs[key]);
+	parent.appendChild(el);
+	return el;
+}
+
+function get_acc_name(accid) 
+{ 
+	var acc = sforce.connection.retrieve("Name", "Account", [accid])[0];
+	return acc.get("Name");
+}
+
+function getMaxConfCallParticipants()
+{
+	try
+	{
+		return SkypeForceTools.MaxConfCallParticipants - 1;
+	}
+	catch(e) 
+	{
+		return 9;
+	}
+}
+
+function PageQueryObject(q)
+{
+	if(q.length > 1)
+		this.q = q.substring(1, q.length);
+	else
+		this.q = null;
+	this.keyValuePairs = new Array();
+	if(this.q)
+	{
+		for(var i=0; i < this.q.split("&").length; i++)
+			this.keyValuePairs[i] = this.q.split("&")[i];
+	}
+	this.getKeyValuePairs = function() { return this.keyValuePairs; }
+	this.getValue = function(s)
+	{
+		for(var j=0; j < this.keyValuePairs.length; j++) {
+			if(this.keyValuePairs[j].split("=")[0] == s)
+				return this.keyValuePairs[j].split("=")[1];
+		}
+		return "";
+	}
+	this.getParameters = function()
+	{
+		var a = new Array(this.getLength());
+		for(var j=0; j < this.keyValuePairs.length; j++)
+			a[j] = this.keyValuePairs[j].split("=")[0];
+		return a;
+	}
+	this.getLength = function() { return this.keyValuePairs.length; }
+}
+var _pageQueryObject = null;
+function UrlGetParameter(key)
+{
+	if(_pageQueryObject == null)
+		_pageQueryObject = new PageQueryObject(top.window.location.search);
+	return _pageQueryObject.getValue(key);
+}
+//--> 
+</script>
+</head>
+<body onload="pageInit()" class="customTab22 overviewPage" >
+
+<div class="bPageTitle">
+<div class="ptBody secondaryPalette">
+<div class="content">
+<img src="/s.gif" alt="Account"  class="pageTitleIcon">
+<h1 class="pageType">Quick Start Conference Call<span class="titleSeparatingColon">:</span></h1>
+<h2 class="pageDescription" id="desc"></h2>
+<div class="blank">&nbsp;</div></div>
+<div class="links"></div>
+</div><div class="ptBreadcrumb"></div></div>
+
+<form name="editPage" id="editPage">
+
+<div id="mainpageblock" class="bPageBlock secondaryPalette">
+ 
+ <div id="outertable" class="pbHeader">
+  <table class="outer" border="0" cellspacing="0" cellpadding="0" width="95%" >
+  <tr><td id="instructions" height="24px" valign="bottom" >
+	
+	<b id=StatusMessage>Loading Opportunities...</b></TD>
+	<td id="buttons"></td>
+  </tr></table>
+ </div>
+ 
+ <div id="maintable" class="pbBody"> <!-- the body --></div>
+
+ <!--  --><div class="pbFooter secondaryPalette"> <div class="bg"></div></div> 
+
+  </div> 
+<!-- end bPageBlock secondaryPalette -->
+
+<table class="outer" border="0" cellspacing="0" cellpadding="8" align="center">
+<tr>
+	<td align=center><div id="sendfilebutton" class="skypebutton" ></div></td>
+	<td align=center><div id="chatbutton" class="skypebutton" ></div></td>
+	<td align=center><div id="skypebutton" class="skypebutton" ></div></td>
+</tr>
+</table>
+</form>
+
+<iframe src="https://www.skype.biz/sfdc2/empty.html" name="callFrame" id="callFrame" frameborder=0 height="0" ></iframe>
+</body>
+</html>

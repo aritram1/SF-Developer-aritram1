@@ -1,0 +1,38 @@
+<apex:page standardcontroller="Opportunity" extensions="OPLItem">
+
+<Script>
+    function test(){
+        alert("Here");
+    }
+</Script>
+
+ <apex:form >
+  <apex:pageBlock >
+   <apex:pageBlockSection >
+    <apex:pageBlockSectionItem >
+      <apex:pageBlockTable value="{!opli}" var="item">
+          <apex:column headerValue="Select"> <apex:inputCheckbox value="{!item.IsDeleted }"/> </apex:column>
+          <apex:column headerValue="PricebookEntryname"> <apex:outputText value="{!item.PricebookEntry.name}"/> </apex:column>
+          <apex:column headerValue="Quantity"> <apex:inputField value="{!item.Quantity}"/> </apex:column>
+          <apex:column headerValue="UnitPrice"> <apex:inputField value="{!item.UnitPrice}"/> </apex:column>
+          <apex:column headerValue="TotalPrice"> <apex:outputField value="{!item.TotalPrice}"/> </apex:column>
+          <apex:column headerValue="Description"> <apex:inputField value="{!item.Description}"/> </apex:column>
+     </apex:pageBlockTable> 
+    </apex:pageBlockSectionItem>
+   </apex:pageBlockSection>
+  
+<!-- <apex:pageBlockButtons >
+    <apex:commandButton action="{!Save}" value="Save OPLI"/>
+    <apex:commandButton action="{!Delete}"  value="Delete OPLI"/>
+ </apex:pageBlockButtons>
+-->
+   
+ <apex:pageBlockButtons >
+    <apex:commandButton action="{!dosave}" value="Save OPLI" immediate="true"/>
+    <apex:commandButton action="{!del}"  value="Delete OPLI"/>
+  </apex:pageBlockButtons>
+ 
+
+  </apex:pageBlock>
+ </apex:form>
+</apex:page>

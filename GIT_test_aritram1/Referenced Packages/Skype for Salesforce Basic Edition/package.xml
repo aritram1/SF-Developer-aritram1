@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Package xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Skype for Salesforce Basic Edition</fullName>
+    <apiAccessLevel>Unrestricted</apiAccessLevel>
+    <description>Adds full Skype integration to your Salesforce organization. Make and receive calls directly from Salesforce and start conference calls. Supports caller identification for inbound calls (Caller ID must be present).</description>
+    <namespacePrefix>Skype4SF</namespacePrefix>
+    <setupWeblink>SFinstallInstructions</setupWeblink>
+    <types>
+        <members>Skype</members>
+        <name>CustomApplication</name>
+    </types>
+    <types>
+        <members>Account.skype_name__c</members>
+        <members>Contact.skype_name__c</members>
+        <members>Lead.skype_name__c</members>
+        <members>User.skype_name__c</members>
+        <name>CustomField</name>
+    </types>
+    <types>
+        <members>SFinstallInstructions</members>
+        <name>CustomPageWebLink</name>
+    </types>
+    <types>
+        <members>Skype</members>
+        <members>SkypeConferenceCall</members>
+        <name>CustomTab</name>
+    </types>
+    <types>
+        <members>Skype</members>
+        <members>Skype/CTISkypePoweredLogo.gif</members>
+        <members>Skype/ContextmenuAddContact.gif</members>
+        <members>Skype/ContextmenuCallStart.gif</members>
+        <members>Skype/ContextmenuInfo.gif</members>
+        <members>Skype/ContextmenuMessage.gif</members>
+        <members>Skype/ContextmenuSendfile.gif</members>
+        <members>Skype/ContextmenuVoicemail.gif</members>
+        <members>Skype/Contextmenuarrow.gif</members>
+        <members>Skype/Skype4sfdcinfopage.URL</members>
+        <members>Skype/SkypeLogo.jpg</members>
+        <members>Skype/SkypeLogogif.gif</members>
+        <members>Skype/SkypeLogopng.png</members>
+        <name>Document</name>
+    </types>
+    <types>
+        <members>Skype_Conf_Call</members>
+        <name>Scontrol</name>
+    </types>
+    <types>
+        <members>Contact.InviteUserToSkype</members>
+        <members>Opportunity.Start_Skype_Conference</members>
+        <name>WebLink</name>
+    </types>
+    <version>33.0</version>
+</Package>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomTab xmlns="http://soap.sforce.com/2006/04/metadata">
+    <description>Overview of Style Intelligence for Salesforce.com</description>
+    <frameHeight>500</frameHeight>
+    <hasSidebar>true</hasSidebar>
+    <label>About Style Intelligence</label>
+    <mobileReady>false</mobileReady>
+    <motif>Custom84: Presenter</motif>
+    <url>https://www.salesforcereporting.com/app/faces/about.jsp</url>
+    <urlEncodingKey>UTF-8</urlEncodingKey>
+</CustomTab>

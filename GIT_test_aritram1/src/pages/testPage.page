@@ -1,0 +1,11 @@
+<apex:page standardController="account">
+  <apex:form >
+      <apex:outputField value="{!account.name}"/>
+  
+  
+  
+      <apex:commandButton action="{!Save}" value="Save"/>
+      <apex:commandButton action="{!quicksave}" value="Quick Save"/>
+      <apex:commandButton action="{!Cancel}" value="Cancel"/>
+  </apex:form>
+</apex:page>

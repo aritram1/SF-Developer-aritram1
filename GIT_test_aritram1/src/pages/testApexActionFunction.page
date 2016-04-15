@@ -1,0 +1,45 @@
+<apex:page standardcontroller="Account" extensions="class_testApexFunction" id="id_page">
+   <apex:pageblock id="id_pageblock1"> 
+    <apex:pageblocksection id="id_pageblocksection1">
+    
+    <apex:pageblocksectionitem id="id_pageblocksectionitem1">
+    <apex:form id="id_form1">
+       Account Website
+        <apex:inputField value="{!Account.site}" id="id_site"/>
+    </apex:form>    
+    </apex:pageblocksectionitem>
+    </apex:pageblocksection>   
+    
+    
+     <apex:pageblockButtons >
+      <apex:form >
+       <apex:commandButton value="Save" onclick="scriptMethod()"/>
+      </apex:form>
+     </apex:pageblockButtons>
+    </apex:pageblock> 
+    
+    <apex:form >
+    <apex:actionFunction name="actionFunctionTest" action="{!apexMethod}" rerender="id_pageblock1"/>
+    </apex:form>
+    
+ <script>
+     function scriptMethod(){
+      var v = document.getElementById("id_page:id_pageblock1:id_pageblocksection1:id_pageblocksectionitem1:id_form1:id_site").value;
+      alert("Site values is " + v);
+      if(v == ''){
+       alert("Please Populate the Site Value");
+      }
+      else{
+       alert('You are being redirected');
+       window.setTimeout(actionFunctionTest,1000);
+       alert('Crossed the limit');
+      } 
+     }
+ </script>   
+    
+    
+    
+    
+    
+    
+</apex:page>

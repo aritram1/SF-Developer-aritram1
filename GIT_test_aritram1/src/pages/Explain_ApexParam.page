@@ -1,0 +1,21 @@
+<apex:page standardController="Account" extensions="class_Explain_ApexParam">
+ <apex:pageblock >
+ <apex:form >
+  <apex:pageblocksection >
+   
+   <apex:pageblocksectionItem >
+     <apex:outputlabel value="Enter the Parameter"/>
+     <apex:inputtext />
+   </apex:pageblocksectionItem>
+   
+   <apex:pageblocksectionItem >
+    <apex:outputlabel value="{!accountRating}" rendered="{!showRating}"/>
+   </apex:pageblocksectionItem>
+  
+  </apex:pageblocksection>
+
+  <apex:commandButton value="Click" action="{!ApexParamTest}"  />
+  <apex:param value="{!Account.rating}"/>
+ </apex:form>
+ </apex:pageblock>
+</apex:page>
